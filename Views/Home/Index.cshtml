@@ -1,8 +1,479 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@model Sentinel.Web.Models.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Sentinel Dashboard";
+
+    var severityTotal = Model.SeverityCounts.Values.Sum();
+    var statusTotal = Model.StatusCounts.Values.Sum();
+
+    var severityColors = new Dictionary<string, string>
+    {
+        ["Critical"] = "bg-danger",
+        ["High"] = "bg-orange",
+        ["Medium"] = "bg-warning",
+        ["Low"] = "bg-success"
+    };
+
+    var maxTrendValue = Model.EventTrends.Any()
+        ? Math.Max(1, Model.EventTrends.Max(x =>
+            Math.Max(x.Errors, x.SecurityThreats)))
+        : 1;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    .dashboard-header {
+        margin-bottom: 28px;
+    }
+
+    .dashboard-subtitle {
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .dashboard-card {
+        background: #111c30;
+        border: 1px solid #26364d;
+        border-radius: 12px;
+        color: #e2e8f0;
+        height: 100%;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        border-color: #3b82f6;
+    }
+
+    .dashboard-card .card-body {
+        padding: 22px;
+    }
+
+    .stat-label {
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 12px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #f1f5f9;
+    }
+
+    .stat-description {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .stat-accent {
+        width: 4px;
+        border-radius: 8px;
+        position: absolute;
+        left: 0;
+        top: 18px;
+        bottom: 18px;
+    }
+
+    .accent-blue { background: #3b82f6; }
+    .accent-red { background: #ef4444; }
+    .accent-orange { background: #f97316; }
+    .accent-purple { background: #8b5cf6; }
+
+    .analytics-card {
+        background: #111c30;
+        border: 1px solid #26364d;
+        border-radius: 12px;
+        color: #e2e8f0;
+    }
+
+    .analytics-card .card-body {
+        padding: 24px;
+    }
+
+    .analytics-title {
+        color: #f1f5f9;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .analytics-description {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .chart-area {
+        min-height: 250px;
+    }
+
+    .chart-column {
+        min-width: 0;
+    }
+
+    .chart-bars {
+        height: 205px;
+        border-bottom: 1px solid #334155;
+    }
+
+    .chart-bar {
+        min-height: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .chart-bar:hover {
+        opacity: 0.75;
+    }
+
+    .chart-day {
+        color: #94a3b8;
+        font-size: 11px;
+        margin-top: 10px;
+    }
+
+    .chart-value {
+        color: #cbd5e1;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .legend-text {
+        color: #cbd5e1;
+        font-size: 12px;
+    }
+
+    .analytics-row {
+        margin-bottom: 22px;
+    }
+
+    .analytics-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .analytics-label {
+        color: #cbd5e1;
+        font-size: 13px;
+    }
+
+    .analytics-count {
+        color: #f1f5f9;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .analytics-progress {
+        height: 8px;
+        background: #26364d;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .analytics-progress .progress-bar {
+        border-radius: 10px;
+    }
+
+    .empty-state {
+        color: #94a3b8;
+        background: #0d1526;
+        border: 1px dashed #334155;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .bg-orange {
+        background-color: #f97316 !important;
+    }
+
+    @@media (max-width: 576px) {
+        .stat-value {
+            font-size: 26px;
+        }
+
+        .analytics-card .card-body {
+            padding: 18px;
+        }
+
+        .chart-bars {
+            height: 175px;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h2 class="fw-bold mb-2" style="color: #f1f5f9;">
+                    Sentinel Dashboard
+                </h2>
+                <p class="dashboard-subtitle mb-0">
+                    Software Error, Bug & Security Threat Tracking System
+                </p>
+            </div>
+
+            <span class="badge rounded-pill px-3 py-2"
+                  style="background: #172554; color: #93c5fd; border: 1px solid #1d4ed8;">
+                <span class="d-inline-block rounded-circle bg-success me-2"
+                      style="width: 7px; height: 7px;"></span>
+                Monitoring Overview
+            </span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card position-relative">
+                <div class="stat-accent accent-blue"></div>
+                <div class="card-body">
+                    <p class="stat-label">Active Projects</p>
+                    <h2 class="stat-value">@Model.TotalProjects</h2>
+                    <span class="stat-description">Registered active projects</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card position-relative">
+                <div class="stat-accent accent-purple"></div>
+                <div class="card-body">
+                    <p class="stat-label">Tracked Services</p>
+                    <h2 class="stat-value">@Model.TotalServices</h2>
+                    <span class="stat-description">Services under tracking</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card position-relative">
+                <div class="stat-accent accent-red"></div>
+                <div class="card-body">
+                    <p class="stat-label">Recorded Errors</p>
+                    <h2 class="stat-value" style="color: #f87171;">
+                        @Model.TotalErrors
+                    </h2>
+                    <span class="stat-description">Total recorded errors</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card dashboard-card position-relative">
+                <div class="stat-accent accent-orange"></div>
+                <div class="card-body">
+                    <p class="stat-label">Security Threats</p>
+                    <h2 class="stat-value" style="color: #fbbf24;">
+                        @Model.TotalSecurityThreats
+                    </h2>
+                    <span class="stat-description">Total recorded threats</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 7-Day Event Trends -->
+    <div class="card analytics-card mb-4">
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                <div>
+                    <h5 class="analytics-title mb-1">7-Day Event Trends</h5>
+                    <p class="analytics-description mb-0">
+                        Daily comparison of recorded errors and security threats
+                    </p>
+                </div>
+
+                <div class="d-flex flex-wrap gap-3">
+                    <span class="legend-text">
+                        <span class="d-inline-block rounded-circle bg-danger me-1"
+                              style="width: 9px; height: 9px;"></span>
+                        Errors
+                    </span>
+
+                    <span class="legend-text">
+                        <span class="d-inline-block rounded-circle bg-primary me-1"
+                              style="width: 9px; height: 9px;"></span>
+                        Security Threats
+                    </span>
+                </div>
+            </div>
+
+            @if (Model.EventTrends.Any())
+            {
+                <div class="row g-2 align-items-end text-center chart-area">
+
+                    @foreach (var day in Model.EventTrends)
+                    {
+                        var errorHeight = day.Errors * 100.0 / maxTrendValue;
+                        var threatHeight = day.SecurityThreats * 100.0 / maxTrendValue;
+
+                        <div class="col chart-column">
+
+                            <div class="d-flex justify-content-center align-items-end gap-1 chart-bars">
+
+                                <!-- Error Bar -->
+                                <div class="d-flex flex-column justify-content-end align-items-center"
+                                     style="height: 100%; width: 40%;">
+
+                                    <span class="chart-value mb-1">
+                                        @day.Errors
+                                    </span>
+
+                                    <div class="bg-danger rounded-top w-100 chart-bar"
+                                         style="height: @errorHeight.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%; min-height: @(day.Errors > 0 ? "3px" : "0");">
+                                    </div>
+                                </div>
+
+                                <!-- Security Threat Bar -->
+                                <div class="d-flex flex-column justify-content-end align-items-center"
+                                     style="height: 100%; width: 40%;">
+
+                                    <span class="chart-value mb-1">
+                                        @day.SecurityThreats
+                                    </span>
+
+                                    <div class="bg-primary rounded-top w-100 chart-bar"
+                                         style="height: @threatHeight.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%; min-height: @(day.SecurityThreats > 0 ? "3px" : "0");">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="chart-day">
+                                @day.Day
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    No trend data is available yet.
+                </div>
+            }
+
+        </div>
+    </div>
+
+    <!-- Severity and Status Analytics -->
+    <div class="row g-3">
+
+        <!-- Events by Severity -->
+        <div class="col-12 col-lg-6">
+            <div class="card analytics-card h-100">
+                <div class="card-body">
+
+                    <h5 class="analytics-title mb-1">Events by Severity</h5>
+                    <p class="analytics-description mb-4">
+                        Distribution of events according to severity level
+                    </p>
+
+                    @foreach (var item in Model.SeverityCounts)
+                    {
+                        var percentage = severityTotal == 0
+                            ? 0
+                            : item.Value * 100.0 / severityTotal;
+
+                        var colorClass = severityColors.ContainsKey(item.Key)
+                            ? severityColors[item.Key]
+                            : "bg-secondary";
+
+                        <div class="analytics-row">
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="analytics-label">@item.Key</span>
+                                <strong class="analytics-count">@item.Value</strong>
+                            </div>
+
+                            <div class="progress analytics-progress">
+                                <div class="progress-bar @colorClass"
+                                     role="progressbar"
+                                     style="width: @percentage.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"
+                                     aria-valuenow="@percentage"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+
+                    @if (severityTotal == 0)
+                    {
+                        <div class="empty-state">
+                            No events recorded yet.
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Events by Status -->
+        <div class="col-12 col-lg-6">
+            <div class="card analytics-card h-100">
+                <div class="card-body">
+
+                    <h5 class="analytics-title mb-1">Events by Status</h5>
+                    <p class="analytics-description mb-4">
+                        Current progress of recorded events
+                    </p>
+
+                    @foreach (var item in Model.StatusCounts)
+                    {
+                        var percentage = statusTotal == 0
+                            ? 0
+                            : item.Value * 100.0 / statusTotal;
+
+                        var statusColor = item.Key switch
+                        {
+                            "Open" => "bg-danger",
+                            "In Progress" => "bg-info",
+                            "Resolved" => "bg-success",
+                            _ => "bg-secondary"
+                        };
+
+                        <div class="analytics-row">
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="analytics-label">@item.Key</span>
+                                <strong class="analytics-count">@item.Value</strong>
+                            </div>
+
+                            <div class="progress analytics-progress">
+                                <div class="progress-bar @statusColor"
+                                     role="progressbar"
+                                     style="width: @percentage.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"
+                                     aria-valuenow="@percentage"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+
+                    @if (statusTotal == 0)
+                    {
+                        <div class="empty-state">
+                            No events recorded yet.
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>

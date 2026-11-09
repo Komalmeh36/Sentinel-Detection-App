@@ -1,0 +1,55 @@
+
+@model Sentinel.Web.Models.AuditLog
+
+@{
+    ViewData["Title"] = "Audit Log Details";
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Audit Log Details</h2>
+            <p class="text-secondary mb-0">
+                Review the recorded activity.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            ← Back
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Activity Information</h5>
+        </div>
+
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3 mb-3">Action</dt>
+                <dd class="col-sm-9 mb-3">
+                    <span class="badge bg-primary">@Model.Action</span>
+                </dd>
+
+                <dt class="col-sm-3 mb-3">User</dt>
+                <dd class="col-sm-9 mb-3">
+                    @(string.IsNullOrWhiteSpace(Model.UserId)
+                        ? "System"
+                        : Model.UserId)
+                </dd>
+
+                <dt class="col-sm-3 mb-3">Details</dt>
+                <dd class="col-sm-9 mb-3">
+                    @(string.IsNullOrWhiteSpace(Model.Details)
+                        ? "No details available."
+                        : Model.Details)
+                </dd>
+
+                <dt class="col-sm-3 mb-3">Timestamp</dt>
+                <dd class="col-sm-9 mb-3">
+                    @(Model.Timestamp.ToLocalTime().ToString("dd MMMM yyyy, hh:mm:ss tt"))
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>

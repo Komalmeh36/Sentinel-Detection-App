@@ -1,0 +1,91 @@
+
+@model Sentinel.Web.Models.Project
+
+@{
+    ViewData["Title"] = "Edit Project";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Edit Project</h1>
+            <p class="text-muted">Update your project's information.</p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            Back to Projects
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Project Information</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">
+                        Project Name
+                    </label>
+                    <input asp-for="Name" class="form-control"
+                           placeholder="Enter project name" />
+                    <span asp-validation-for="Name"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">
+                        Description
+                    </label>
+                    <textarea asp-for="Description" class="form-control"
+                              rows="4"
+                              placeholder="Describe your project"></textarea>
+                    <span asp-validation-for="Description"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="OrganizationId" class="form-label">
+                        Organization
+                    </label>
+
+                    <select asp-for="OrganizationId"
+                            class="form-select"
+                            asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(
+                                ViewBag.Organizations, "Id", "Name", Model.OrganizationId))">
+                        <option value="">-- Select Organization --</option>
+                    </select>
+
+                    <span asp-validation-for="OrganizationId"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="IsArchived" class="form-check-input" />
+                    <label asp-for="IsArchived" class="form-check-label">
+                        Archive this project
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+
+                <a asp-action="Index" class="btn btn-outline-secondary ms-2">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,168 @@
+
+@model Sentinel.Web.Models.EventItem
+
+@{
+    ViewData["Title"] = "Record Event";
+}
+
+<div class="container-fluid px-0">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Record Event</h2>
+            <p class="text-secondary mb-0">
+                Record a software error or security threat.
+            </p>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-light">
+            ← Back
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Event Information</h5>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <!-- Event Title -->
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">
+                        Event Title
+                    </label>
+
+                    <input asp-for="Title"
+                           class="form-control"
+                           placeholder="e.g., Login failure detected"
+                           required
+                           maxlength="150" />
+
+                    <span asp-validation-for="Title"
+                          class="text-danger"></span>
+                </div>
+
+                <!-- Event Description -->
+                <div class="mb-3">
+                    <label asp-for="Message" class="form-label">
+                        Description / Message
+                    </label>
+
+                    <textarea asp-for="Message"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Describe what happened..."
+                              required
+                              maxlength="2000"></textarea>
+
+                    <span asp-validation-for="Message"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="row">
+
+                    <!-- Event Type -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Type" class="form-label">
+                            Event Type
+                        </label>
+
+                        <select asp-for="Type"
+                                class="form-select"
+                                required>
+                            <option value="Error">Error</option>
+                            <option value="Security Threat">Security Threat</option>
+                        </select>
+
+                        <span asp-validation-for="Type"
+                              class="text-danger"></span>
+                    </div>
+
+                    <!-- Severity -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Severity" class="form-label">
+                            Severity
+                        </label>
+
+                        <select asp-for="Severity"
+                                class="form-select"
+                                required>
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+
+                        <span asp-validation-for="Severity"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <div class="row">
+
+                    <!-- Event Status -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Status" class="form-label">
+                            Status
+                        </label>
+
+                        <select asp-for="Status"
+                                class="form-select"
+                                required>
+                            <option value="Open" selected>Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+
+                        <span asp-validation-for="Status"
+                              class="text-danger"></span>
+                    </div>
+
+                    <!-- Associated Service -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ServiceId" class="form-label">
+                            Associated Service
+                        </label>
+
+                        <select asp-for="ServiceId"
+                                asp-items="ViewBag.ServiceId"
+                                class="form-select"
+                                required>
+                            <option value="">-- Select a Service --</option>
+                        </select>
+
+                        <span asp-validation-for="ServiceId"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        Save Event
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-light">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

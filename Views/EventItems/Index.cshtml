@@ -1,0 +1,397 @@
+
+@model IEnumerable<Sentinel.Web.Models.EventItem>
+
+@{
+    ViewData["Title"] = "Errors & Events";
+}
+
+<div class="container-fluid px-0">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="mb-1">Errors & Events</h2>
+            <p class="text-secondary mb-0">
+                Monitor software errors and security threats.
+            </p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            + Record Event
+        </a>
+    </div>
+
+    <!-- Success Notification -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Search, Filters and Sorting -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Search, Filter & Sort Events</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Index" method="get">
+
+                <div class="row g-3">
+
+                    <!-- Search -->
+                    <div class="col-lg-12">
+                        <label for="searchString" class="form-label">
+                            Search Events
+                        </label>
+
+                        <input type="text"
+                               id="searchString"
+                               name="searchString"
+                               value="@ViewBag.SearchString"
+                               class="form-control"
+                               placeholder="Search by event title or description..." />
+                    </div>
+
+                    <!-- Event Type -->
+                    <div class="col-md-3">
+                        <label for="type" class="form-label">Event Type</label>
+
+                        <select id="type" name="type" class="form-select">
+                            <option value="">All Types</option>
+
+                            <option value="Error"
+                                    selected="@(ViewBag.SelectedType as string == "Error")">
+                                Error
+                            </option>
+
+                            <option value="Security Threat"
+                                    selected="@(ViewBag.SelectedType as string == "Security Threat")">
+                                Security Threat
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Severity -->
+                    <div class="col-md-3">
+                        <label for="severity" class="form-label">Severity</label>
+
+                        <select id="severity" name="severity" class="form-select">
+                            <option value="">All Severities</option>
+
+                            <option value="Critical"
+                                    selected="@(ViewBag.SelectedSeverity as string == "Critical")">
+                                Critical
+                            </option>
+
+                            <option value="High"
+                                    selected="@(ViewBag.SelectedSeverity as string == "High")">
+                                High
+                            </option>
+
+                            <option value="Medium"
+                                    selected="@(ViewBag.SelectedSeverity as string == "Medium")">
+                                Medium
+                            </option>
+
+                            <option value="Low"
+                                    selected="@(ViewBag.SelectedSeverity as string == "Low")">
+                                Low
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Status</label>
+
+                        <select id="status" name="status" class="form-select">
+                            <option value="">All Statuses</option>
+
+                            <option value="Open"
+                                    selected="@(ViewBag.SelectedStatus as string == "Open")">
+                                Open
+                            </option>
+
+                            <option value="In Progress"
+                                    selected="@(ViewBag.SelectedStatus as string == "In Progress")">
+                                In Progress
+                            </option>
+
+                            <option value="Resolved"
+                                    selected="@(ViewBag.SelectedStatus as string == "Resolved")">
+                                Resolved
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Sorting -->
+                    <div class="col-md-3">
+                        <label for="sortBy" class="form-label">Sort By</label>
+
+                        <select id="sortBy" name="sortBy" class="form-select">
+                            <option value="newest"
+                                    selected="@(ViewBag.SelectedSort as string == "newest")">
+                                Newest First
+                            </option>
+
+                            <option value="oldest"
+                                    selected="@(ViewBag.SelectedSort as string == "oldest")">
+                                Oldest First
+                            </option>
+
+                            <option value="title"
+                                    selected="@(ViewBag.SelectedSort as string == "title")">
+                                Title (A–Z)
+                            </option>
+
+                            <option value="severity"
+                                    selected="@(ViewBag.SelectedSort as string == "severity")">
+                                Severity (Critical First)
+                            </option>
+
+                            <option value="status"
+                                    selected="@(ViewBag.SelectedSort as string == "status")">
+                                Status (Open First)
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="d-flex gap-2 mt-4 flex-wrap">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Apply
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-outline-light">
+                        Clear All
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Events Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Event Records</h5>
+
+            <span class="badge bg-primary">
+                @Model.Count() Records
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-5">
+                    <h5>No matching events found</h5>
+
+                    <p class="text-secondary">
+                        Try changing your search or filter criteria.
+                    </p>
+
+                    <a asp-action="Index" class="btn btn-outline-light">
+                        Clear All
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Service</th>
+                                <th>Created</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">
+                                        @item.Title
+                                    </td>
+
+                                    <td>
+                                        @if (item.Type == "Security Threat")
+                                        {
+                                            <span class="badge bg-primary">
+                                                Security Threat
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                @item.Type
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (item.Severity == "Critical")
+                                        {
+                                            <span class="badge bg-danger">Critical</span>
+                                        }
+                                        else if (item.Severity == "High")
+                                        {
+                                            <span class="badge bg-warning text-dark">High</span>
+                                        }
+                                        else if (item.Severity == "Medium")
+                                        {
+                                            <span class="badge bg-info text-dark">Medium</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                @item.Severity
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (item.Status == "Open")
+                                        {
+                                            <span class="badge bg-danger">Open</span>
+                                        }
+                                        else if (item.Status == "In Progress")
+                                        {
+                                            <span class="badge bg-info text-dark">
+                                                In Progress
+                                            </span>
+                                        }
+                                        else if (item.Status == "Resolved")
+                                        {
+                                            <span class="badge bg-success">Resolved</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @item.Status
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @(item.Service?.Name ?? "Unknown")
+                                    </td>
+
+                                    <td class="text-nowrap">
+                                        @item.CreatedAt.ToLocalTime()
+                                            .ToString("dd MMM yyyy, hh:mm tt")
+                                    </td>
+
+                                    <td class="text-end text-nowrap">
+                                        <a asp-action="Details"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-light">
+                                            View
+                                        </a>
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Edit
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteEventModal"
+                                                data-event-id="@item.Id"
+                                                data-event-title="@item.Title">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteEventModal" tabindex="-1"
+     aria-labelledby="deleteEventModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEventModalLabel">
+                    Delete Event?
+                </h5>
+
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                Are you sure you want to delete
+                <strong id="deleteEventTitle">this event</strong>?
+
+                <p class="text-secondary small mt-2 mb-0">
+                    This action cannot be undone.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <form id="deleteEventForm" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="btn btn-danger">
+                        Delete Event
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const modal = document.getElementById("deleteEventModal");
+
+            modal.addEventListener("show.bs.modal", function (event) {
+
+                const button = event.relatedTarget;
+                const id = button.getAttribute("data-event-id");
+                const title = button.getAttribute("data-event-title");
+
+                document.getElementById("deleteEventTitle").textContent = title;
+
+                document.getElementById("deleteEventForm").action =
+                    "/EventItems/Delete/" + id;
+            });
+
+        });
+    </script>
+}

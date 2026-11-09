@@ -1,0 +1,51 @@
+
+@model Sentinel.Web.Models.Organization
+
+@{
+    ViewData["Title"] = "Edit Organization";
+}
+
+<div class="container mt-4">
+    <h1>Edit Organization</h1>
+    <p class="text-muted">
+        Update the organization's information.
+    </p>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">
+                        Organization Name
+                    </label>
+
+                    <input asp-for="Name" class="form-control"
+                           placeholder="Enter organization name" />
+
+                    <span asp-validation-for="Name"
+                          class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary ms-2">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

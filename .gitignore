@@ -480,3 +480,10 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+# Sentinel local SQLite database
+sentinel.db
+sentinel.db-shm
+sentinel.db-wal
+
+# Local development settings
+appsettings.Development.json
