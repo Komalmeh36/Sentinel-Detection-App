@@ -487,3 +487,12 @@ sentinel.db-wal
 
 # Local development settings
 appsettings.Development.json
+# Docker
+.dockerignore
+
+# Local database and project backups
+*.db
+*.db-shm
+*.db-wal
+*.backup
+postgres-migration-review.txt

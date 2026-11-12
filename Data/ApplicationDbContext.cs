@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using Sentinel.Web.Models;
 
@@ -5,7 +6,13 @@ namespace Sentinel.Web.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        protected ApplicationDbContext(DbContextOptions options)
             : base(options)
         {
         }
