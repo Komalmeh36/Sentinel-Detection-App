@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.git/
+.gitignore
+.vs/
+.vscode/
+*.db
+*.db-shm
+*.db-wal
+*.backup
+postgres-migration-review.txt

@@ -488,7 +488,6 @@ sentinel.db-wal
 # Local development settings
 appsettings.Development.json
 # Docker
-.dockerignore
 
 # Local database and project backups
 *.db
